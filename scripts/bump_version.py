@@ -11,9 +11,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "custom_components" / "location_intelligence" / "manifest.json"
-FRONTEND_PACKAGE = (
-    ROOT / "frontend" / "cards" / "location-intelligence-card" / "package.json"
-)
 CHANGELOG = ROOT / "CHANGELOG.md"
 
 
@@ -28,7 +25,6 @@ def main() -> int:
         return 1
 
     update_json_version(MANIFEST, version)
-    update_json_version(FRONTEND_PACKAGE, version)
     update_changelog(version)
     print(f"updated release version to {version}")
     return 0
@@ -56,4 +52,3 @@ def update_changelog(version: str) -> None:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

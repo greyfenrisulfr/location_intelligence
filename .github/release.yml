@@ -28,7 +28,6 @@ template: |
 
   ## Notes
 
-  - Home Assistant custom integration package is attached to the release artifacts.
+  - Packaged `custom_components/location_intelligence` artifact is attached to the release.
 name-template: "v$RESOLVED_VERSION"
 tag-template: "v$RESOLVED_VERSION"
-

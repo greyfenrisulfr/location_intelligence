@@ -1,6 +1,6 @@
 # Home Assistant Location Intelligence
 
-Home Assistant custom integration and frontend card scaffold for generic spatial awareness across people, devices, animals, vehicles, assets, and places.
+Home Assistant custom integration scaffold for generic spatial awareness across people, devices, animals, vehicles, assets, and places.
 
 ## Scope
 
@@ -15,13 +15,10 @@ This repository starts the backend architecture for:
 - derived Home Assistant entities
 - diagnostics and services
 
-It also includes a frontend workspace placeholder for future custom cards.
-
 ## Repository layout
 
 ```text
 custom_components/location_intelligence/
-frontend/cards/location-intelligence-card/
 ```
 
 ## Current backend services
@@ -56,4 +53,4 @@ Pull requests are also grouped automatically by Release Drafter to keep release 
 1. Add real Home Assistant entity discovery for `person`, `device_tracker`, and zone-aware sources.
 2. Persist subject/source mapping in storage.
 3. Build richer derived entities for direction, range, and confidence bands.
-4. Implement frontend cards against the backend service and entity model.
+4. Expand derived entities, diagnostics, and service workflows for production use.

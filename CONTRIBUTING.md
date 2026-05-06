@@ -19,4 +19,3 @@
 5. Push `main` and the tag.
 
 GitHub Actions will create the release and attach a packaged `custom_components/location_intelligence` archive.
-

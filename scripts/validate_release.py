@@ -9,9 +9,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "custom_components" / "location_intelligence" / "manifest.json"
-FRONTEND_PACKAGE = (
-    ROOT / "frontend" / "cards" / "location-intelligence-card" / "package.json"
-)
 
 
 def main() -> int:
@@ -21,13 +18,10 @@ def main() -> int:
 
     version = sys.argv[1]
     manifest_version = load_version(MANIFEST)
-    frontend_version = load_version(FRONTEND_PACKAGE)
 
     mismatches: list[str] = []
     if manifest_version != version:
         mismatches.append(f"manifest.json version is {manifest_version}, expected {version}")
-    if frontend_version != version:
-        mismatches.append(f"package.json version is {frontend_version}, expected {version}")
 
     if mismatches:
         for mismatch in mismatches:
