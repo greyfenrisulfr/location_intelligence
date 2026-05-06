@@ -53,6 +53,24 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             vol.Optional("source_type", default="manual"): str,
         }
     )
+    SERVICE_UPSERT_PLACE_SCHEMA = vol.Schema(
+        {
+            vol.Required("place_id"): str,
+            vol.Optional("place_name"): str,
+            vol.Optional("kind", default="coordinates"): str,
+            vol.Optional("latitude"): vol.Coerce(float),
+            vol.Optional("longitude"): vol.Coerce(float),
+            vol.Optional("target_subject_id"): str,
+        }
+    )
+    SERVICE_ASSIGN_REFERENCE_PLACE_SCHEMA = vol.Schema(
+        {
+            vol.Required("subject_id"): str,
+            vol.Required("place_id"): str,
+        }
+    )
+    SERVICE_REMOVE_PLACE_SCHEMA = vol.Schema({vol.Required("place_id"): str})
+    SERVICE_CLEAR_REFERENCE_PLACE_SCHEMA = vol.Schema({vol.Required("subject_id"): str})
     SERVICE_CLEAR_SUBJECT_SCHEMA = vol.Schema({vol.Required("subject_id"): str})
 
     async def handle_refresh(call: ServiceCall) -> None:
@@ -104,6 +122,45 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             return
         await runtime.async_clear_subject(call.data["subject_id"])
 
+    async def handle_upsert_place(call: ServiceCall) -> None:
+        runtime = _first_runtime(hass)
+        if runtime is None:
+            _LOGGER.debug("Upsert place requested without an active config entry")
+            return
+
+        place_id = call.data["place_id"]
+        await runtime.async_upsert_place(
+            place_id=place_id,
+            place_name=call.data.get("place_name", place_id),
+            kind=call.data.get("kind", "coordinates"),
+            latitude=call.data.get("latitude"),
+            longitude=call.data.get("longitude"),
+            target_subject_id=call.data.get("target_subject_id"),
+        )
+
+    async def handle_assign_reference_place(call: ServiceCall) -> None:
+        runtime = _first_runtime(hass)
+        if runtime is None:
+            _LOGGER.debug("Assign reference place requested without an active config entry")
+            return
+        await runtime.async_assign_reference_place(
+            call.data["subject_id"], call.data["place_id"]
+        )
+
+    async def handle_remove_place(call: ServiceCall) -> None:
+        runtime = _first_runtime(hass)
+        if runtime is None:
+            _LOGGER.debug("Remove place requested without an active config entry")
+            return
+        await runtime.async_remove_place(call.data["place_id"])
+
+    async def handle_clear_reference_place(call: ServiceCall) -> None:
+        runtime = _first_runtime(hass)
+        if runtime is None:
+            _LOGGER.debug("Clear reference place requested without an active config entry")
+            return
+        await runtime.async_clear_reference_place(call.data["subject_id"])
+
     if not hass.services.has_service(DOMAIN, "refresh"):
         hass.services.async_register(DOMAIN, "refresh", handle_refresh)
     if not hass.services.has_service(DOMAIN, "ingest_fix"):
@@ -113,6 +170,28 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     if not hass.services.has_service(DOMAIN, "link_source"):
         hass.services.async_register(
             DOMAIN, "link_source", handle_link_source, schema=SERVICE_LINK_SOURCE_SCHEMA
+        )
+    if not hass.services.has_service(DOMAIN, "upsert_place"):
+        hass.services.async_register(
+            DOMAIN, "upsert_place", handle_upsert_place, schema=SERVICE_UPSERT_PLACE_SCHEMA
+        )
+    if not hass.services.has_service(DOMAIN, "assign_reference_place"):
+        hass.services.async_register(
+            DOMAIN,
+            "assign_reference_place",
+            handle_assign_reference_place,
+            schema=SERVICE_ASSIGN_REFERENCE_PLACE_SCHEMA,
+        )
+    if not hass.services.has_service(DOMAIN, "remove_place"):
+        hass.services.async_register(
+            DOMAIN, "remove_place", handle_remove_place, schema=SERVICE_REMOVE_PLACE_SCHEMA
+        )
+    if not hass.services.has_service(DOMAIN, "clear_reference_place"):
+        hass.services.async_register(
+            DOMAIN,
+            "clear_reference_place",
+            handle_clear_reference_place,
+            schema=SERVICE_CLEAR_REFERENCE_PLACE_SCHEMA,
         )
     if not hass.services.has_service(DOMAIN, "clear_subject"):
         hass.services.async_register(

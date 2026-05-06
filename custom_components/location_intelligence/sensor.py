@@ -65,6 +65,25 @@ SUBJECT_DESCRIPTIONS: tuple[SubjectSensorDescription, ...] = (
         icon="mdi:compass-outline",
         value_key="direction_from_home",
     ),
+    SubjectSensorDescription(
+        key="reference_place",
+        name="Reference Place",
+        icon="mdi:map-marker-check-outline",
+        value_key="reference_place",
+    ),
+    SubjectSensorDescription(
+        key="distance_from_reference",
+        name="Distance From Reference",
+        icon="mdi:map-marker-path",
+        native_unit_of_measurement="m",
+        value_key="distance_from_reference",
+    ),
+    SubjectSensorDescription(
+        key="direction_from_reference",
+        name="Direction From Reference",
+        icon="mdi:compass-rose",
+        value_key="direction_from_reference",
+    ),
 )
 
 
@@ -209,6 +228,12 @@ class SubjectEstimateSensor(RuntimeBackedSensor):
             return estimate.distance_from_home_m
         if self.entity_description.value_key == "direction_from_home":
             return estimate.direction_from_home
+        if self.entity_description.value_key == "reference_place":
+            return estimate.reference_place_name
+        if self.entity_description.value_key == "distance_from_reference":
+            return estimate.distance_from_reference_m
+        if self.entity_description.value_key == "direction_from_reference":
+            return estimate.direction_from_reference
         return None
 
     @property
@@ -229,6 +254,18 @@ class SubjectEstimateSensor(RuntimeBackedSensor):
             "observed_at": estimate.observed_at.isoformat(),
             "rationale": estimate.rationale,
         }
+        if estimate.reference_place_id is not None:
+            attributes["reference_place_id"] = estimate.reference_place_id
+        if estimate.reference_place_name is not None:
+            attributes["reference_place_name"] = estimate.reference_place_name
+        if estimate.reference_place_kind is not None:
+            attributes["reference_place_kind"] = estimate.reference_place_kind
+        if estimate.distance_from_reference_m is not None:
+            attributes["distance_from_reference_m"] = estimate.distance_from_reference_m
+        if estimate.bearing_from_reference_deg is not None:
+            attributes["bearing_from_reference_deg"] = estimate.bearing_from_reference_deg
+        if estimate.direction_from_reference is not None:
+            attributes["direction_from_reference"] = estimate.direction_from_reference
         if estimate.distance_from_home_m is not None:
             attributes["distance_from_home_m"] = estimate.distance_from_home_m
         if estimate.bearing_from_home_deg is not None:

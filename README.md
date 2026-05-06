@@ -29,6 +29,14 @@ custom_components/location_intelligence/
   Injects a location fix for a subject from a named source.
 - `location_intelligence.link_source`
   Persists a subject-to-source mapping without adding a manual fix.
+- `location_intelligence.upsert_place`
+  Creates or updates static places, dynamic subject-following places, and last-known places.
+- `location_intelligence.assign_reference_place`
+  Assigns a subject-specific reference place.
+- `location_intelligence.remove_place`
+  Removes a named place and any assignments to it.
+- `location_intelligence.clear_reference_place`
+  Resets a subject to the default Home reference place.
 - `location_intelligence.clear_subject`
   Removes a subject and its current derived state.
 
@@ -39,7 +47,8 @@ The current integration intentionally avoids fake precision:
 - discovery only links clearly identifiable `person` and `device_tracker` sources
 - fusion uses weighted averaging only when coordinates are reasonably clustered
 - confidence is capped by age and source diversity
-- diagnostics expose explainable intermediate data and stored mappings
+- persisted recent fixes are used conservatively as last-known fallback
+- diagnostics expose explainable intermediate data, stored mappings, and place definitions
 
 ## Release management
 
@@ -58,3 +67,7 @@ Pull requests are also grouped automatically by Release Drafter to keep release 
 2. Support temporary and dynamic places such as vehicle, group leader, and last-known position.
 3. Persist selected recent fixes for restart continuity.
 4. Add more complete Home Assistant tests around entity setup and service flows.
+
+These are now partially implemented through named places, dynamic `subject` and `last_known`
+place kinds, persisted recent fixes, and broader unit coverage. The remaining gap is full
+Home Assistant runtime testing with the HA dependency stack installed.

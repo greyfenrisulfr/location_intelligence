@@ -77,6 +77,73 @@ link_source:
       selector:
         text:
 
+upsert_place:
+  name: Upsert place
+  description: Create or update a static or dynamic named place.
+  fields:
+    place_id:
+      required: true
+      selector:
+        text:
+    place_name:
+      selector:
+        text:
+    kind:
+      selector:
+        select:
+          options:
+            - coordinates
+            - subject
+            - last_known
+    latitude:
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: 0.000001
+          mode: box
+    longitude:
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: 0.000001
+          mode: box
+    target_subject_id:
+      selector:
+        text:
+
+assign_reference_place:
+  name: Assign reference place
+  description: Assign a named place as the subject-specific reference location.
+  fields:
+    subject_id:
+      required: true
+      selector:
+        text:
+    place_id:
+      required: true
+      selector:
+        text:
+
+remove_place:
+  name: Remove place
+  description: Remove a named place and any subject assignments to it.
+  fields:
+    place_id:
+      required: true
+      selector:
+        text:
+
+clear_reference_place:
+  name: Clear reference place
+  description: Reset a subject back to the default Home reference place.
+  fields:
+    subject_id:
+      required: true
+      selector:
+        text:
+
 clear_subject:
   name: Clear subject
   description: Remove all mappings and current estimates for a subject.

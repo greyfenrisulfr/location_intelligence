@@ -41,6 +41,29 @@ class SourceLink:
 
 
 @dataclass(slots=True)
+class ReferencePlace:
+    """A named place that can be static or dynamically resolved."""
+
+    place_id: str
+    name: str
+    kind: str = "coordinates"
+    latitude: float | None = None
+    longitude: float | None = None
+    target_subject_id: str | None = None
+
+
+@dataclass(slots=True)
+class ResolvedPlace:
+    """A reference place with concrete coordinates."""
+
+    place_id: str
+    name: str
+    kind: str
+    latitude: float
+    longitude: float
+
+
+@dataclass(slots=True)
 class SubjectEstimate:
     """Derived position estimate for a subject."""
 
@@ -52,6 +75,12 @@ class SubjectEstimate:
     source_count: int
     rationale: list[str]
     accuracy_m: float | None = None
+    reference_place_id: str | None = None
+    reference_place_name: str | None = None
+    reference_place_kind: str | None = None
+    distance_from_reference_m: float | None = None
+    bearing_from_reference_deg: float | None = None
+    direction_from_reference: str | None = None
     distance_from_home_m: float | None = None
     bearing_from_home_deg: float | None = None
     direction_from_home: str | None = None

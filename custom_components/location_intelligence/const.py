@@ -13,6 +13,7 @@ DOMAIN = "location_intelligence"
 NAME = "Location Intelligence"
 STORAGE_VERSION = 1
 STORAGE_KEY = DOMAIN
+MAX_RECENT_FIXES = 5
 
 PLATFORMS: list[Platform] = ["sensor"]
 
