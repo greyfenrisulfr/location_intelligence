@@ -1,0 +1,13 @@
+{
+  "domain": "location_intelligence",
+  "name": "Location Intelligence",
+  "codeowners": ["@greyfenrisulfr"],
+  "config_flow": true,
+  "documentation": "https://github.com/greyfenrisulfr/location_intelligence",
+  "issue_tracker": "https://github.com/greyfenrisulfr/location_intelligence/issues",
+  "iot_class": "local_polling",
+  "loggers": ["custom_components.location_intelligence"],
+  "requirements": [],
+  "version": "0.1.0"
+}
+

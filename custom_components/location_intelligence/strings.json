@@ -1,0 +1,15 @@
+{
+  "config": {
+    "flow_title": "Location Intelligence",
+    "step": {
+      "user": {
+        "title": "Set up Location Intelligence",
+        "description": "Create the Location Intelligence integration entry."
+      }
+    },
+    "abort": {
+      "already_configured": "Location Intelligence is already configured."
+    }
+  }
+}
+

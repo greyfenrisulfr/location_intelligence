@@ -1,0 +1,57 @@
+refresh:
+  name: Refresh discovery
+  description: Refresh candidate location source discovery.
+
+ingest_fix:
+  name: Ingest fix
+  description: Inject a location fix for a subject from a named source.
+  fields:
+    subject_id:
+      required: true
+      selector:
+        text:
+    source_id:
+      required: true
+      selector:
+        text:
+    source_name:
+      selector:
+        text:
+    latitude:
+      required: true
+      selector:
+        number:
+          min: -90
+          max: 90
+          step: 0.000001
+          mode: box
+    longitude:
+      required: true
+      selector:
+        number:
+          min: -180
+          max: 180
+          step: 0.000001
+          mode: box
+    accuracy_m:
+      selector:
+        number:
+          min: 0
+          max: 100000
+          step: 1
+          mode: box
+    confidence:
+      selector:
+        number:
+          min: 0
+          max: 1
+          step: 0.01
+          mode: slider
+    speed_m_s:
+      selector:
+        number:
+          min: 0
+          max: 200
+          step: 0.1
+          mode: box
+

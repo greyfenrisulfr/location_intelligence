@@ -1,0 +1,14 @@
+{
+  "name": "@location-intelligence/card",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "echo \"frontend build scaffold pending\"",
+    "lint": "echo \"frontend lint scaffold pending\""
+  },
+  "dependencies": {
+    "lit": "^3.3.0"
+  }
+}
+
