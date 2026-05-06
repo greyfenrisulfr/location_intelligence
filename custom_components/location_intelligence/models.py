@@ -37,6 +37,7 @@ class SourceLink:
     subject_id: str
     source_id: str
     source_name: str
+    source_type: str = "unknown"
 
 
 @dataclass(slots=True)
@@ -51,5 +52,7 @@ class SubjectEstimate:
     source_count: int
     rationale: list[str]
     accuracy_m: float | None = None
+    distance_from_home_m: float | None = None
+    bearing_from_home_deg: float | None = None
+    direction_from_home: str | None = None
     observed_at: datetime = field(default_factory=lambda: datetime.now(UTC))
-

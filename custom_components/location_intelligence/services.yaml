@@ -1,6 +1,6 @@
 refresh:
   name: Refresh discovery
-  description: Refresh candidate location source discovery.
+  description: Refresh candidate location source discovery and rebuild derived estimates.
 
 ingest_fix:
   name: Ingest fix
@@ -15,6 +15,9 @@ ingest_fix:
       selector:
         text:
     source_name:
+      selector:
+        text:
+    source_type:
       selector:
         text:
     latitude:
@@ -55,3 +58,30 @@ ingest_fix:
           step: 0.1
           mode: box
 
+link_source:
+  name: Link source
+  description: Persist a subject-to-source mapping without injecting a manual fix.
+  fields:
+    subject_id:
+      required: true
+      selector:
+        text:
+    source_id:
+      required: true
+      selector:
+        text:
+    source_name:
+      selector:
+        text:
+    source_type:
+      selector:
+        text:
+
+clear_subject:
+  name: Clear subject
+  description: Remove all mappings and current estimates for a subject.
+  fields:
+    subject_id:
+      required: true
+      selector:
+        text:

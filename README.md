@@ -4,11 +4,11 @@ Home Assistant custom integration scaffold for generic spatial awareness across 
 
 ## Scope
 
-This repository starts the backend architecture for:
+This repository now includes a working backend baseline for:
 
-- source discovery
+- source discovery from `person`, `device_tracker`, and `zone`
 - source classification
-- subject/source mapping
+- persistent subject/source mapping
 - source fusion
 - confidence scoring
 - distance and bearing calculations
@@ -24,18 +24,22 @@ custom_components/location_intelligence/
 ## Current backend services
 
 - `location_intelligence.refresh`
-  Triggers discovery refresh.
+  Triggers discovery refresh and estimate rebuild.
 - `location_intelligence.ingest_fix`
   Injects a location fix for a subject from a named source.
+- `location_intelligence.link_source`
+  Persists a subject-to-source mapping without adding a manual fix.
+- `location_intelligence.clear_subject`
+  Removes a subject and its current derived state.
 
 ## Development notes
 
-The current scaffold intentionally avoids fake precision:
+The current integration intentionally avoids fake precision:
 
-- discovery returns no inferred subjects by default
+- discovery only links clearly identifiable `person` and `device_tracker` sources
 - fusion uses weighted averaging only when coordinates are reasonably clustered
 - confidence is capped by age and source diversity
-- diagnostics expose explainable intermediate data
+- diagnostics expose explainable intermediate data and stored mappings
 
 ## Release management
 
@@ -50,7 +54,7 @@ Pull requests are also grouped automatically by Release Drafter to keep release 
 
 ## Next steps
 
-1. Add real Home Assistant entity discovery for `person`, `device_tracker`, and zone-aware sources.
-2. Persist subject/source mapping in storage.
-3. Build richer derived entities for direction, range, and confidence bands.
-4. Expand derived entities, diagnostics, and service workflows for production use.
+1. Add subject-specific reference places beyond Home Assistant home coordinates.
+2. Support temporary and dynamic places such as vehicle, group leader, and last-known position.
+3. Persist selected recent fixes for restart continuity.
+4. Add more complete Home Assistant tests around entity setup and service flows.
