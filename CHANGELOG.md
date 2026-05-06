@@ -8,6 +8,14 @@ The format is based on Keep a Changelog, with an `Unreleased` section that is fi
 
 - 
 
+## [0.1.1] - 2026-05-06
+
+- Added named reference places with per-subject assignment.
+- Added dynamic `subject` and `last_known` place kinds for moving or fallback references.
+- Persisted bounded recent-fix history for restart continuity and conservative last-known fallback.
+- Expanded derived sensors and diagnostics with reference-place distance, bearing, and direction data.
+- Added focused unit tests for place resolution and recent-fix history behavior.
+
 ## [0.1.0] - 2026-05-06
 
 - Initial Home Assistant Location Intelligence integration scaffold.
