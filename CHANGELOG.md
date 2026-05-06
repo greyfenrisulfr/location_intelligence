@@ -8,6 +8,13 @@ The format is based on Keep a Changelog, with an `Unreleased` section that is fi
 
 - 
 
+## [0.1.2] - 2026-05-06
+
+- Added persistent exclusion support for specific `person.*` entities.
+- Excluded person entities are now skipped during discovery and removed from derived subjects.
+- Added Home Assistant services to exclude or re-include person entities without editing code.
+- Extended diagnostics and documentation to expose configured person exclusions.
+
 ## [0.1.1] - 2026-05-06
 
 - Added named reference places with per-subject assignment.
