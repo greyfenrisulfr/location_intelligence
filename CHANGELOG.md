@@ -8,6 +8,13 @@ The format is based on Keep a Changelog, with an `Unreleased` section that is fi
 
 - 
 
+## [0.1.3] - 2026-05-06
+
+- Added Home Assistant-backed runtime tests for config entry setup, derived sensors, and service flows.
+- Fixed dynamic subject sensor creation to use a Home Assistant-safe job path when new subjects appear at runtime.
+- Added CI installation and execution of the Home Assistant test stack, including the `pycares<5` compatibility pin.
+- Updated GitHub Actions workflow dependencies to Node 24-compatible action versions.
+
 ## [0.1.2] - 2026-05-06
 
 - Added persistent exclusion support for specific `person.*` entities.

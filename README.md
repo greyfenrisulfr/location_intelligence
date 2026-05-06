@@ -74,5 +74,10 @@ Pull requests are also grouped automatically by Release Drafter to keep release 
 4. Add more complete Home Assistant tests around entity setup and service flows.
 
 These are now partially implemented through named places, dynamic `subject` and `last_known`
-place kinds, persisted recent fixes, and broader unit coverage. The remaining gap is full
-Home Assistant runtime testing with the HA dependency stack installed.
+place kinds, persisted recent fixes, and broader unit coverage.
+
+The remaining runtime-testing gap is now covered by Home Assistant-backed tests for:
+
+- config entry setup and derived sensor registration
+- subject lifecycle service flows such as `ingest_fix`, `clear_subject`, and exclude/include
+- reference place assignment through Home Assistant services

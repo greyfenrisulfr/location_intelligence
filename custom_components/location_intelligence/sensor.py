@@ -121,11 +121,18 @@ async def async_setup_entry(
     if initial_entities:
         async_add_entities(initial_entities)
 
+    async def async_add_new_subject_entities() -> None:
+        """Add newly discovered subject sensors in a task context."""
+
+        entities = build_subject_entities()
+        if entities:
+            async_add_entities(entities)
+
     entry.async_on_unload(
         async_dispatcher_connect(
             hass,
             subjects_signal(entry.entry_id),
-            lambda: async_add_entities(build_subject_entities()),
+            lambda: hass.add_job(async_add_new_subject_entities),
         )
     )
 
