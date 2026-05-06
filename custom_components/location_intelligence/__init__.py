@@ -71,6 +71,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
     )
     SERVICE_REMOVE_PLACE_SCHEMA = vol.Schema({vol.Required("place_id"): str})
     SERVICE_CLEAR_REFERENCE_PLACE_SCHEMA = vol.Schema({vol.Required("subject_id"): str})
+    SERVICE_PERSON_ENTITY_SCHEMA = vol.Schema({vol.Required("entity_id"): str})
     SERVICE_CLEAR_SUBJECT_SCHEMA = vol.Schema({vol.Required("subject_id"): str})
 
     async def handle_refresh(call: ServiceCall) -> None:
@@ -161,6 +162,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             return
         await runtime.async_clear_reference_place(call.data["subject_id"])
 
+    async def handle_exclude_person_entity(call: ServiceCall) -> None:
+        runtime = _first_runtime(hass)
+        if runtime is None:
+            _LOGGER.debug("Exclude person requested without an active config entry")
+            return
+        await runtime.async_exclude_person_entity(call.data["entity_id"])
+
+    async def handle_include_person_entity(call: ServiceCall) -> None:
+        runtime = _first_runtime(hass)
+        if runtime is None:
+            _LOGGER.debug("Include person requested without an active config entry")
+            return
+        await runtime.async_include_person_entity(call.data["entity_id"])
+
     if not hass.services.has_service(DOMAIN, "refresh"):
         hass.services.async_register(DOMAIN, "refresh", handle_refresh)
     if not hass.services.has_service(DOMAIN, "ingest_fix"):
@@ -192,6 +207,20 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             "clear_reference_place",
             handle_clear_reference_place,
             schema=SERVICE_CLEAR_REFERENCE_PLACE_SCHEMA,
+        )
+    if not hass.services.has_service(DOMAIN, "exclude_person_entity"):
+        hass.services.async_register(
+            DOMAIN,
+            "exclude_person_entity",
+            handle_exclude_person_entity,
+            schema=SERVICE_PERSON_ENTITY_SCHEMA,
+        )
+    if not hass.services.has_service(DOMAIN, "include_person_entity"):
+        hass.services.async_register(
+            DOMAIN,
+            "include_person_entity",
+            handle_include_person_entity,
+            schema=SERVICE_PERSON_ENTITY_SCHEMA,
         )
     if not hass.services.has_service(DOMAIN, "clear_subject"):
         hass.services.async_register(

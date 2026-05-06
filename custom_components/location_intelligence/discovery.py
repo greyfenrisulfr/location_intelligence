@@ -9,14 +9,19 @@ from .location_helpers import extract_location_fix
 from .source_classification import classify_source
 
 
-async def async_discover_sources(hass: HomeAssistant) -> dict[str, dict]:
+async def async_discover_sources(
+    hass: HomeAssistant, excluded_person_entities: set[str] | None = None
+) -> dict[str, dict]:
     """Discover candidate location sources from existing HA entities."""
 
     entity_registry = async_get_entity_registry(hass)
     sources: dict[str, dict] = {}
+    excluded_person_entities = excluded_person_entities or set()
 
     for domain in ("person", "device_tracker", "zone"):
         for entity_id in hass.states.async_entity_ids(domain):
+            if domain == "person" and entity_id in excluded_person_entities:
+                continue
             state = hass.states.get(entity_id)
             if state is None:
                 continue

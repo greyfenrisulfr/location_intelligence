@@ -37,6 +37,10 @@ custom_components/location_intelligence/
   Removes a named place and any assignments to it.
 - `location_intelligence.clear_reference_place`
   Resets a subject to the default Home reference place.
+- `location_intelligence.exclude_person_entity`
+  Excludes a specific `person.*` entity from discovery and derived subjects.
+- `location_intelligence.include_person_entity`
+  Removes a `person.*` entity from the exclusion list.
 - `location_intelligence.clear_subject`
   Removes a subject and its current derived state.
 
@@ -45,6 +49,7 @@ custom_components/location_intelligence/
 The current integration intentionally avoids fake precision:
 
 - discovery only links clearly identifiable `person` and `device_tracker` sources
+- defined `person.*` entities can be explicitly excluded from discovery
 - fusion uses weighted averaging only when coordinates are reasonably clustered
 - confidence is capped by age and source diversity
 - persisted recent fixes are used conservatively as last-known fallback

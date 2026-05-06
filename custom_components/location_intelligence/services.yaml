@@ -144,6 +144,26 @@ clear_reference_place:
       selector:
         text:
 
+exclude_person_entity:
+  name: Exclude person entity
+  description: Exclude a specific person entity from discovery and derived subjects.
+  fields:
+    entity_id:
+      required: true
+      selector:
+        entity:
+          domain: person
+
+include_person_entity:
+  name: Include person entity
+  description: Remove a specific person entity from the exclusion list.
+  fields:
+    entity_id:
+      required: true
+      selector:
+        entity:
+          domain: person
+
 clear_subject:
   name: Clear subject
   description: Remove all mappings and current estimates for a subject.

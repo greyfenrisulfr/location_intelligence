@@ -23,6 +23,7 @@ async def async_get_config_entry_diagnostics(
         },
         "discovered_source_count": len(runtime.discovered_sources) if runtime else 0,
         "discovered_sources": runtime.discovered_sources if runtime else {},
+        "excluded_person_entities": sorted(runtime.excluded_person_entities) if runtime else [],
         "subjects": runtime.subject_registry.subjects() if runtime else [],
         "links": runtime.subject_registry.as_dict() if runtime else {},
         "places": {

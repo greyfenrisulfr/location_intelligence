@@ -44,6 +44,7 @@ class LocationIntelligenceRuntime:
     places: dict[str, ReferencePlace] = field(default_factory=dict)
     subject_reference_places: dict[str, str] = field(default_factory=dict)
     recent_fixes: dict[str, dict[str, list[LocationFix]]] = field(default_factory=dict)
+    excluded_person_entities: set[str] = field(default_factory=set)
 
     def __post_init__(self) -> None:
         self._store = Store[dict](self.hass, STORAGE_VERSION, f"{STORAGE_KEY}.{self.entry_id}")
@@ -57,6 +58,9 @@ class LocationIntelligenceRuntime:
             str(subject_id): str(place_id)
             for subject_id, place_id in (stored.get("subject_reference_places", {}) if stored else {}).items()
         }
+        self.excluded_person_entities = {
+            str(entity_id) for entity_id in (stored.get("excluded_person_entities", []) if stored else [])
+        }
         self.places = {
             place_id: deserialize_place(place)
             for place_id, place in (stored.get("places", {}) if stored else {}).items()
@@ -68,7 +72,10 @@ class LocationIntelligenceRuntime:
         """Refresh discovery, hydrate mappings, and rebuild estimates."""
 
         previous_subjects = set(self.subject_registry.subjects())
-        self.discovered_sources = await async_discover_sources(self.hass)
+        self.discovered_sources = await async_discover_sources(
+            self.hass, excluded_person_entities=self.excluded_person_entities
+        )
+        self._drop_excluded_person_subjects()
         self._sync_mappings_from_discovery()
         self._rebuild_estimates_from_discovery()
         await self._async_save()
@@ -175,6 +182,18 @@ class LocationIntelligenceRuntime:
         await self._async_save()
         self._async_dispatch(previous_subjects)
 
+    async def async_exclude_person_entity(self, entity_id: str) -> None:
+        """Exclude a person entity from discovery and derived subjects."""
+
+        self.excluded_person_entities.add(entity_id)
+        await self.async_refresh()
+
+    async def async_include_person_entity(self, entity_id: str) -> None:
+        """Remove a person entity from the exclusion list."""
+
+        self.excluded_person_entities.discard(entity_id)
+        await self.async_refresh()
+
     async def async_clear_subject(self, subject_id: str) -> None:
         """Remove all data for one subject."""
 
@@ -221,6 +240,15 @@ class LocationIntelligenceRuntime:
                     self.subject_registry.link_source(
                         source_id, source_id, source_name, source_type
                     )
+
+    def _drop_excluded_person_subjects(self) -> None:
+        """Remove excluded person subjects and their transient state."""
+
+        for entity_id in self.excluded_person_entities:
+            self.subject_registry.clear_subject(entity_id)
+            self.latest_estimates.pop(entity_id, None)
+            self.subject_reference_places.pop(entity_id, None)
+            self.recent_fixes.pop(entity_id, None)
 
     def _rebuild_estimates_from_discovery(self) -> None:
         self.subject_registry.clear_fixes()
@@ -321,6 +349,7 @@ class LocationIntelligenceRuntime:
                 },
                 "subject_reference_places": self.subject_reference_places,
                 "recent_fixes": serialize_recent_fixes(self.recent_fixes),
+                "excluded_person_entities": sorted(self.excluded_person_entities),
             }
         )
 
