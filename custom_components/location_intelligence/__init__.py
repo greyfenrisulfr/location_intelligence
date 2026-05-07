@@ -239,6 +239,7 @@ async def async_setup_entry(
     runtime = LocationIntelligenceRuntime(hass=hass, entry_id=entry.entry_id)
     await runtime.async_initialize()
     entry.runtime_data = runtime
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
@@ -260,3 +261,11 @@ def _first_runtime(hass: HomeAssistant) -> Any | None:
         if runtime is not None:
             return runtime
     return None
+
+
+async def _async_options_updated(
+    hass: HomeAssistant, entry: LocationIntelligenceConfigEntry
+) -> None:
+    """Reload the config entry after options change."""
+
+    await hass.config_entries.async_reload(entry.entry_id)

@@ -8,6 +8,12 @@ The format is based on Keep a Changelog, with an `Unreleased` section that is fi
 
 - 
 
+## [0.1.4] - 2026-05-07
+
+- Added a config-entry options flow to exclude selected `person.*` entities from discovery.
+- Synced the existing exclude/include person services with config entry options so both paths update the same source of truth.
+- Added runtime coverage for option-based person exclusion and reload behavior.
+
 ## [0.1.3] - 2026-05-06
 
 - Added Home Assistant-backed runtime tests for config entry setup, derived sensors, and service flows.

@@ -10,6 +10,16 @@
     "abort": {
       "already_configured": "Location Intelligence is already configured."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Location Intelligence options",
+        "description": "Choose which person entities should be excluded from discovery and derived subjects.",
+        "data": {
+          "excluded_person_entities": "Excluded person entities"
+        }
+      }
+    }
   }
 }
-

@@ -11,6 +11,7 @@ from homeassistant.helpers.storage import Store
 
 from .calculations import bearing_deg, cardinal_direction, distance_m
 from .const import (
+    CONF_EXCLUDED_PERSON_ENTITIES,
     MAX_RECENT_FIXES,
     STORAGE_KEY,
     STORAGE_VERSION,
@@ -53,14 +54,19 @@ class LocationIntelligenceRuntime:
         """Load stored mappings and populate runtime state."""
 
         stored = await self._store.async_load()
+        stored_exclusions = {
+            str(entity_id)
+            for entity_id in (stored.get(CONF_EXCLUDED_PERSON_ENTITIES, []) if stored else [])
+        }
+        option_exclusions = self._entry_option_exclusions()
         self.subject_registry = SubjectRegistry.from_dict(stored.get("links") if stored else None)
         self.subject_reference_places = {
             str(subject_id): str(place_id)
             for subject_id, place_id in (stored.get("subject_reference_places", {}) if stored else {}).items()
         }
-        self.excluded_person_entities = {
-            str(entity_id) for entity_id in (stored.get("excluded_person_entities", []) if stored else [])
-        }
+        self.excluded_person_entities = (
+            option_exclusions if option_exclusions is not None else stored_exclusions
+        )
         self.places = {
             place_id: deserialize_place(place)
             for place_id, place in (stored.get("places", {}) if stored else {}).items()
@@ -186,12 +192,14 @@ class LocationIntelligenceRuntime:
         """Exclude a person entity from discovery and derived subjects."""
 
         self.excluded_person_entities.add(entity_id)
+        self._async_update_entry_options()
         await self.async_refresh()
 
     async def async_include_person_entity(self, entity_id: str) -> None:
         """Remove a person entity from the exclusion list."""
 
         self.excluded_person_entities.discard(entity_id)
+        self._async_update_entry_options()
         await self.async_refresh()
 
     async def async_clear_subject(self, subject_id: str) -> None:
@@ -349,7 +357,7 @@ class LocationIntelligenceRuntime:
                 },
                 "subject_reference_places": self.subject_reference_places,
                 "recent_fixes": serialize_recent_fixes(self.recent_fixes),
-                "excluded_person_entities": sorted(self.excluded_person_entities),
+                CONF_EXCLUDED_PERSON_ENTITIES: sorted(self.excluded_person_entities),
             }
         )
 
@@ -358,3 +366,35 @@ class LocationIntelligenceRuntime:
         current_subjects = set(self.subject_registry.subjects())
         if current_subjects != previous_subjects:
             async_dispatcher_send(self.hass, subjects_signal(self.entry_id))
+
+    def _entry_option_exclusions(self) -> set[str] | None:
+        """Return excluded people configured through config entry options."""
+
+        entry = self._get_entry()
+        if entry is None:
+            return None
+        if CONF_EXCLUDED_PERSON_ENTITIES not in entry.options:
+            return None
+        return {
+            str(entity_id)
+            for entity_id in entry.options.get(CONF_EXCLUDED_PERSON_ENTITIES, [])
+        }
+
+    def _async_update_entry_options(self) -> None:
+        """Persist runtime exclusions back into config entry options."""
+
+        entry = self._get_entry()
+        if entry is None:
+            return
+        self.hass.config_entries.async_update_entry(
+            entry,
+            options={
+                **entry.options,
+                CONF_EXCLUDED_PERSON_ENTITIES: sorted(self.excluded_person_entities),
+            },
+        )
+
+    def _get_entry(self):
+        """Return the config entry that owns this runtime."""
+
+        return self.hass.config_entries.async_get_entry(self.entry_id)

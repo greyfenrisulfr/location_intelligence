@@ -18,6 +18,7 @@ MAX_RECENT_FIXES = 5
 PLATFORMS: list[Platform] = ["sensor"]
 
 DEFAULT_ENTRY_NAME = "Location Intelligence"
+CONF_EXCLUDED_PERSON_ENTITIES = "excluded_person_entities"
 
 
 def update_signal(entry_id: str) -> str:

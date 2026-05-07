@@ -6,16 +6,25 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.location_intelligence.const import DEFAULT_ENTRY_NAME, DOMAIN
+from custom_components.location_intelligence.const import (
+    CONF_EXCLUDED_PERSON_ENTITIES,
+    DEFAULT_ENTRY_NAME,
+    DOMAIN,
+)
 
 
-async def _async_setup_integration(hass: HomeAssistant) -> MockConfigEntry:
+async def _async_setup_integration(
+    hass: HomeAssistant,
+    *,
+    options: dict | None = None,
+) -> MockConfigEntry:
     assert await async_setup_component(hass, DOMAIN, {DOMAIN: {}})
 
     entry = MockConfigEntry(
         domain=DOMAIN,
         title=DEFAULT_ENTRY_NAME,
         data={},
+        options=options or {},
         entry_id="test-entry",
     )
     entry.add_to_hass(hass)
@@ -198,6 +207,7 @@ async def test_exclude_and_include_person_entity_refreshes_subjects(
 
     assert entry.runtime_data.subject_registry.subjects() == []
     assert "person.charlie" in entry.runtime_data.excluded_person_entities
+    assert entry.options[CONF_EXCLUDED_PERSON_ENTITIES] == ["person.charlie"]
     assert hass.states.get(tracked_subjects_entity_id).state == "0"
 
     await hass.services.async_call(
@@ -210,4 +220,39 @@ async def test_exclude_and_include_person_entity_refreshes_subjects(
 
     assert entry.runtime_data.subject_registry.subjects() == ["person.charlie"]
     assert "person.charlie" not in entry.runtime_data.excluded_person_entities
+    assert entry.options[CONF_EXCLUDED_PERSON_ENTITIES] == []
     assert hass.states.get(tracked_subjects_entity_id).state == "1"
+
+
+async def test_config_entry_option_excludes_person_entity_on_setup(
+    hass: HomeAssistant, enable_custom_integrations: None
+) -> None:
+    hass.config.latitude = 48.2082
+    hass.config.longitude = 16.3738
+
+    hass.states.async_set(
+        "person.alice",
+        "home",
+        {
+            "friendly_name": "Alice",
+            "latitude": 48.2083,
+            "longitude": 16.3739,
+        },
+    )
+    hass.states.async_set(
+        "person.bob",
+        "home",
+        {
+            "friendly_name": "Bob",
+            "latitude": 48.2084,
+            "longitude": 16.374,
+        },
+    )
+
+    entry = await _async_setup_integration(
+        hass,
+        options={CONF_EXCLUDED_PERSON_ENTITIES: ["person.alice"]},
+    )
+
+    assert entry.runtime_data.subject_registry.subjects() == ["person.bob"]
+    assert "person.alice" in entry.runtime_data.excluded_person_entities
