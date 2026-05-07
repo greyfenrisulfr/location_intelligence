@@ -7,11 +7,12 @@ from dataclasses import dataclass
 from homeassistant.components.sensor import SensorEntity, SensorEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.dispatcher import async_dispatcher_connect
 from homeassistant.helpers.entity import EntityCategory
-from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.entity_platform import AddEntitiesCallback, async_get_current_platform
 
-from .const import subjects_signal, update_signal
+from .const import DOMAIN, subjects_signal, update_signal
 from .entity import LocationIntelligenceEntity
 from .runtime import LocationIntelligenceRuntime
 
@@ -87,6 +88,12 @@ SUBJECT_DESCRIPTIONS: tuple[SubjectSensorDescription, ...] = (
 )
 
 
+def _subject_unique_id(subject_id: str, key: str) -> str:
+    """Return the unique ID for a subject sensor."""
+
+    return f"location_intelligence_{subject_id}_{key}"
+
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry[LocationIntelligenceRuntime],
@@ -96,6 +103,28 @@ async def async_setup_entry(
 
     runtime = entry.runtime_data
     known_subjects: set[str] = set()
+    entity_registry = er.async_get(hass)
+    platform = async_get_current_platform()
+
+    current_subject_unique_ids = {
+        _subject_unique_id(subject_id, description.key)
+        for subject_id in runtime.subject_registry.subjects()
+        for description in SUBJECT_DESCRIPTIONS
+    }
+    for entity_id, registry_entry in list(entity_registry.entities.items()):
+        if registry_entry.config_entry_id != entry.entry_id:
+            continue
+        if registry_entry.domain != "sensor" or registry_entry.platform != DOMAIN:
+            continue
+        if registry_entry.unique_id in {
+            "location_intelligence_discovered_sources",
+            "location_intelligence_tracked_subjects",
+        }:
+            continue
+        if registry_entry.unique_id in current_subject_unique_ids:
+            continue
+        entity_registry.async_remove(entity_id)
+        hass.states.async_remove(entity_id)
 
     async_add_entities(
         [LocationIntelligenceSensor(runtime=runtime, description=description) for description in DESCRIPTIONS]
@@ -121,8 +150,23 @@ async def async_setup_entry(
     if initial_entities:
         async_add_entities(initial_entities)
 
-    async def async_add_new_subject_entities() -> None:
-        """Add newly discovered subject sensors in a task context."""
+    async def async_sync_subject_entities() -> None:
+        """Add new subject sensors and remove stale ones."""
+
+        current_subjects = set(runtime.subject_registry.subjects())
+        removed_subjects = known_subjects - current_subjects
+
+        for subject_id in removed_subjects:
+            for description in SUBJECT_DESCRIPTIONS:
+                unique_id = _subject_unique_id(subject_id, description.key)
+                entity_id = entity_registry.async_get_entity_id("sensor", DOMAIN, unique_id)
+                if entity_id is not None:
+                    if entity_id in platform.entities:
+                        await platform.entities[entity_id].async_remove(force_remove=True)
+                    entity_registry.async_remove(entity_id)
+                    if hass.states.get(entity_id) is not None:
+                        hass.states.async_remove(entity_id)
+            known_subjects.discard(subject_id)
 
         entities = build_subject_entities()
         if entities:
@@ -132,7 +176,7 @@ async def async_setup_entry(
         async_dispatcher_connect(
             hass,
             subjects_signal(entry.entry_id),
-            lambda: hass.add_job(async_add_new_subject_entities),
+            lambda: hass.add_job(async_sync_subject_entities),
         )
     )
 

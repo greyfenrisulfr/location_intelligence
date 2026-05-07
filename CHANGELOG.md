@@ -8,6 +8,11 @@ The format is based on Keep a Changelog, with an `Unreleased` section that is fi
 
 - 
 
+## [0.1.5] - 2026-05-07
+
+- Fixed subject sensor cleanup so excluding a person removes its derived entities instead of leaving restored unavailable entries behind.
+- Added regression coverage for subject-entity removal and re-creation during exclude/include flows.
+
 ## [0.1.4] - 2026-05-07
 
 - Added a config-entry options flow to exclude selected `person.*` entities from discovery.

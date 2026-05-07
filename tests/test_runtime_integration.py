@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import entity_registry as er
 from homeassistant.setup import async_setup_component
@@ -170,7 +169,7 @@ async def test_services_manage_subjects_and_reference_places(
     await hass.async_block_till_done()
 
     assert "person.bob" not in entry.runtime_data.latest_estimates
-    assert hass.states.get(status_entity_id).state == STATE_UNAVAILABLE
+    assert hass.states.get(status_entity_id) is None
 
 
 async def test_exclude_and_include_person_entity_refreshes_subjects(
@@ -193,9 +192,12 @@ async def test_exclude_and_include_person_entity_refreshes_subjects(
     tracked_subjects_entity_id = _sensor_entity_id(
         hass, "location_intelligence_tracked_subjects"
     )
+    status_unique_id = "location_intelligence_person.charlie_status"
+    status_entity_id = _sensor_entity_id(hass, status_unique_id)
 
     assert entry.runtime_data.subject_registry.subjects() == ["person.charlie"]
     assert hass.states.get(tracked_subjects_entity_id).state == "1"
+    assert hass.states.get(status_entity_id) is not None
 
     await hass.services.async_call(
         DOMAIN,
@@ -209,6 +211,8 @@ async def test_exclude_and_include_person_entity_refreshes_subjects(
     assert "person.charlie" in entry.runtime_data.excluded_person_entities
     assert entry.options[CONF_EXCLUDED_PERSON_ENTITIES] == ["person.charlie"]
     assert hass.states.get(tracked_subjects_entity_id).state == "0"
+    assert hass.states.get(status_entity_id) is None
+    assert er.async_get(hass).async_get_entity_id("sensor", DOMAIN, status_unique_id) is None
 
     await hass.services.async_call(
         DOMAIN,
@@ -222,6 +226,7 @@ async def test_exclude_and_include_person_entity_refreshes_subjects(
     assert "person.charlie" not in entry.runtime_data.excluded_person_entities
     assert entry.options[CONF_EXCLUDED_PERSON_ENTITIES] == []
     assert hass.states.get(tracked_subjects_entity_id).state == "1"
+    assert _sensor_entity_id(hass, status_unique_id) is not None
 
 
 async def test_config_entry_option_excludes_person_entity_on_setup(
